@@ -1,2 +1,2 @@
-# chat-sockets
+# Chat Sockets
 Chat using Sockets
