@@ -67,6 +67,7 @@ public class LaminaMarcoCliente extends JPanel {
                  */
                 DataOutputStream flujo_salida = new DataOutputStream(misocket.getOutputStream());
                 flujo_salida.writeUTF(campo1.getText()); //Especificamos que en nuetro flujo de datos viajara el texto que tengamos en el campo
+                JOptionPane.showMessageDialog(null, "Mensaje enviado con exito", "Mensaje enviado",1);
                 flujo_salida.close();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(campo1, ex.getMessage(), "Error", 0);
