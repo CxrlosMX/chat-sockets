@@ -5,6 +5,9 @@
  */
 package cliente;
 
+import datos.c.DatosEnvio;
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataOutputStream;
@@ -16,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
@@ -29,20 +33,43 @@ import javax.swing.JTextField;
  */
 public class LaminaMarcoCliente extends JPanel {
 
+    private final JPanel laminaMensaje, laminaAreaText, laminaCampo;
+
     public LaminaMarcoCliente() {
-
-        JLabel texto = new JLabel("CLIENTE");
-
-        add(texto);
-
-        campo1 = new JTextField(20);
-
-        add(campo1);
-
+        laminaMensaje = new JPanel();
+        laminaAreaText = new JPanel();
+        laminaCampo = new JPanel();
+        //--------------------------
+        setLayout(new BorderLayout());
+        JLabel texto = new JLabel("CHAT");
+        nick = new JTextField(5);
+        ip = new JTextField(5);
+        texto.setFont(new Font("Serif", Font.ITALIC, 20));
+        laminaMensaje.add(nick);
+        laminaMensaje.add(texto);
+        laminaMensaje.add(ip);
+        //-----------------------
+        //Area de chat
+        areaChat = new JTextArea(20, 30);
+        laminaAreaText.add(areaChat);
+        //-------------------
+        mensaje = new JTextField(20);
+        laminaCampo.add(mensaje);
         miboton = new JButton("Enviar");
         miboton.addActionListener(new EnviaTexto());
-        add(miboton);
+        laminaCampo.add(miboton);
 
+        add(laminaMensaje, BorderLayout.NORTH);
+        add(laminaAreaText, BorderLayout.CENTER);
+        add(laminaCampo, BorderLayout.SOUTH);
+
+    }
+    /*
+     Método que nos retorna el valor de cada recuadro
+     */
+
+    public String dameTexto(JTextField campo) {
+        return campo.getText();
     }
 
     //Crearemos un evento
@@ -62,21 +89,23 @@ public class LaminaMarcoCliente extends JPanel {
              */
             try {
                 Socket misocket = new Socket("192.168.0.7", 9999);
+                
+                DatosEnvio paqueteEnvio=new DatosEnvio(dameTexto(nick), dameTexto(ip), dameTexto(mensaje));
                 /*
                  Especificamos por donde sircularan los datos
                  */
-                DataOutputStream flujo_salida = new DataOutputStream(misocket.getOutputStream());
-                flujo_salida.writeUTF(campo1.getText()); //Especificamos que en nuetro flujo de datos viajara el texto que tengamos en el campo
-                JOptionPane.showMessageDialog(null, "Mensaje enviado con exito", "Mensaje enviado",1);
-                flujo_salida.close();
+                /*  DataOutputStream flujo_salida = new DataOutputStream(misocket.getOutputStream());
+                 flujo_salida.writeUTF(campo1.getText()); //Especificamos que en nuetro flujo de datos viajara el texto que tengamos en el campo
+                 JOptionPane.showMessageDialog(null, "Mensaje enviado con exito", "Mensaje enviado", 1);
+                 flujo_salida.close();*/
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(campo1, ex.getMessage(), "Error", 0);
+                JOptionPane.showMessageDialog(mensaje, ex.getMessage(), "Error", 0);
             }
         }
 
     }
 
-    private JTextField campo1;
-
+    private JTextField mensaje, nick, ip;
+    private JTextArea areaChat;
     private JButton miboton;
 }

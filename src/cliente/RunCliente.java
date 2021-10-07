@@ -8,7 +8,7 @@ package cliente;
 
 import javax.swing.JFrame;
 
-/**
+/**  
  *
  * @author: CxrlosMX
  * @Git-Hub: https://github.com/CxrlosMX

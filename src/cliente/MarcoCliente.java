@@ -21,7 +21,7 @@ public class MarcoCliente extends JFrame{
     public MarcoCliente() {
         setVisible(true);
         setTitle("Cliente");
-        setBounds(600, 300, 280, 350);
+        setBounds(600, 300, 380, 350);
 
         LaminaMarcoCliente milamina = new LaminaMarcoCliente();
 
