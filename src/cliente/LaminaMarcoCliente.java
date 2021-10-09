@@ -10,11 +10,11 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,11 +31,13 @@ import javax.swing.JTextField;
  * @Date: 05-oct-2021
  *
  */
-public class LaminaMarcoCliente extends JPanel {
+public class LaminaMarcoCliente extends JPanel implements Runnable {
 
     private final JPanel laminaMensaje, laminaAreaText, laminaCampo;
 
     public LaminaMarcoCliente() {
+        Thread hilo = new Thread(this);
+        hilo.start();
         laminaMensaje = new JPanel();
         laminaAreaText = new JPanel();
         laminaCampo = new JPanel();
@@ -72,6 +74,25 @@ public class LaminaMarcoCliente extends JPanel {
         return campo.getText();
     }
 
+    @Override
+    public void run() {
+        try {
+            ServerSocket servidorCliente = new ServerSocket(9090);
+            Socket cliente;
+            DatosEnvio paqueteRecibido;
+            while (true) {
+                cliente = servidorCliente.accept(); //Abrimos nuestro socket para aceptar todos los mensajes
+                ObjectInputStream flujoEntrada = new ObjectInputStream(cliente.getInputStream());
+                paqueteRecibido = (DatosEnvio) flujoEntrada.readObject();
+                areaChat.append("\n" + paqueteRecibido.getNick() + ": " + paqueteRecibido.getMensaje() + ". para: " + paqueteRecibido.getIp());
+
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+
     //Crearemos un evento
     private class EnviaTexto implements ActionListener {
 
@@ -88,16 +109,14 @@ public class LaminaMarcoCliente extends JPanel {
              port - the port number.
              */
             try {
-                Socket misocket = new Socket("192.168.0.7", 9999);
-                
-                DatosEnvio paqueteEnvio=new DatosEnvio(dameTexto(nick), dameTexto(ip), dameTexto(mensaje));
-                /*
-                 Especificamos por donde sircularan los datos
-                 */
-                /*  DataOutputStream flujo_salida = new DataOutputStream(misocket.getOutputStream());
-                 flujo_salida.writeUTF(campo1.getText()); //Especificamos que en nuetro flujo de datos viajara el texto que tengamos en el campo
-                 JOptionPane.showMessageDialog(null, "Mensaje enviado con exito", "Mensaje enviado", 1);
-                 flujo_salida.close();*/
+                Socket misocket = new Socket("192.168.0.7", 9999); //Creamos el puente
+                //Creamos un objeto donde almacenamos los datos
+                DatosEnvio paqueteEnvio = new DatosEnvio(dameTexto(nick), dameTexto(ip), dameTexto(mensaje));
+
+                ObjectOutputStream paqueteDatos = new ObjectOutputStream(misocket.getOutputStream());
+
+                paqueteDatos.writeObject(paqueteEnvio);
+                misocket.close();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(mensaje, ex.getMessage(), "Error", 0);
             }

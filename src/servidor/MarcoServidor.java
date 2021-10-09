@@ -5,9 +5,12 @@
  */
 package servidor;
 
+import datos.c.DatosEnvio;
 import java.awt.BorderLayout;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -29,6 +32,7 @@ import javax.swing.JTextArea;
 public class MarcoServidor extends JFrame implements Runnable {
 
     private JTextArea areatexto;
+    private DatosEnvio datosEnvio;
 
     public MarcoServidor() {
         Thread hilo = new Thread(this);
@@ -63,19 +67,33 @@ public class MarcoServidor extends JFrame implements Runnable {
              */
             ServerSocket servidor = new ServerSocket(9999); //Abrimos el puerto, esta a la escucha
 
+            String mensaje;
+            String nick;
+            String ip;
+            datosEnvio = new DatosEnvio();
             while (true) {
                 //Le decimos a nuestra aplicación que acepte cualquier petición que venga del exterior
                 Socket miSo = servidor.accept(); //Le decimos que acepte todo tipo de entrada
                 //------
-                DataInputStream entradaDatos = new DataInputStream(miSo.getInputStream());//Leemos el flujo de datos
+                ObjectInputStream entradaDatos = new ObjectInputStream(miSo.getInputStream());//Leemos el flujo de datos
+                datosEnvio = (DatosEnvio) entradaDatos.readObject();
+                mensaje = datosEnvio.getMensaje();
+                nick = datosEnvio.getNick();
+                ip = datosEnvio.getNick();
+                areatexto.append("\n" + nick + ": " + mensaje + "para " + ip);
 
-                String cadena = entradaDatos.readUTF();
-                JOptionPane.showMessageDialog(this, "Usted Tiene un nuevo mensaje", "Nuevo Mensaje", 1);
-                //areatexto.setText(cadena); Eliminar el texto y agrega el nuevo
-                areatexto.append(cadena + "\n");//Agrega un texto nuevo,sin eliminar el contenido
+                //Creamos otro socket, es el que enviara el mensaje a otro usuario
+                Socket enviarDestinatario = new Socket(ip, 9090); //Especificamos la ip y el puerto
+
+                ObjectOutputStream paqueteEnvio = new ObjectOutputStream(enviarDestinatario.getOutputStream());
+
+                //Agregamos el mensaje u objecto que se enviara
+                paqueteEnvio.writeObject(new DatosEnvio(nick, ip, mensaje));
+                paqueteEnvio.close();
+                enviarDestinatario.close();
                 miSo.close();
             }
-        } catch (IOException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", 0);
         }
     }

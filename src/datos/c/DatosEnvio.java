@@ -5,6 +5,8 @@
  */
 package datos.c;
 
+import java.io.Serializable;
+
 /**
  *
  * @author: CxrlosMX
@@ -14,7 +16,7 @@ package datos.c;
  * @Date: 06-oct-2021
  *
  */
-public class DatosEnvio {
+public class DatosEnvio implements Serializable { //Implement la interface Serializable para especificar que nuestra clase podra convertirse en bits
 
     private String nick;
     private String ip;
@@ -24,6 +26,10 @@ public class DatosEnvio {
         this.nick = nick;
         this.ip = ip;
         this.mensaje = mensaje;
+    }
+
+    public DatosEnvio() {
+
     }
 
     public String getNick() {
