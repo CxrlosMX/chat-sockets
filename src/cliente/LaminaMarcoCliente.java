@@ -8,6 +8,7 @@ package cliente;
 import datos.c.DatosEnvio;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -34,22 +36,38 @@ import javax.swing.JTextField;
 public class LaminaMarcoCliente extends JPanel implements Runnable {
 
     private final JPanel laminaMensaje, laminaAreaText, laminaCampo;
+    private JTextField mensaje;
+    private JComboBox ips;
+    private JLabel nick, menNick;
+    private JTextArea areaChat;
+    private JButton miboton;
 
     public LaminaMarcoCliente() {
+        /*
+         Metodo que pregunta el nombre del usuario
+         */
+        String nick_usuario = preguntaNombre();
         Thread hilo = new Thread(this);
         hilo.start();
         laminaMensaje = new JPanel();
+        laminaMensaje.setLayout(new GridLayout(1, 2));
         laminaAreaText = new JPanel();
         laminaCampo = new JPanel();
         //--------------------------
         setLayout(new BorderLayout());
-        JLabel texto = new JLabel("CHAT");
-        nick = new JTextField(5);
-        ip = new JTextField(5);
-        texto.setFont(new Font("Serif", Font.ITALIC, 20));
+        JLabel texto = new JLabel("Online: ");
+        nick = new JLabel();
+        menNick = new JLabel("Nick: ");
+        ips = new JComboBox();
+        ips.addItem("Usuario 1");
+        ips.addItem("Usuario 2");
+        ips.addItem("Usuario 3");
+        nick.setText(nick_usuario);
+        //texto.setFont(new Font("Serif", Font.ITALIC, 20));
+        laminaMensaje.add(menNick);
         laminaMensaje.add(nick);
         laminaMensaje.add(texto);
-        laminaMensaje.add(ip);
+        laminaMensaje.add(ips);
         //-----------------------
         //Area de chat
         areaChat = new JTextArea(20, 30);
@@ -65,6 +83,10 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
         add(laminaAreaText, BorderLayout.CENTER);
         add(laminaCampo, BorderLayout.SOUTH);
 
+    }
+
+    public String preguntaNombre() {
+        return JOptionPane.showInputDialog(this, "Nick: ", "Introduciendo Nombre de usuario", 1);
     }
     /*
      Método que nos retorna el valor de cada recuadro
@@ -108,10 +130,11 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
              address - the IP address.
              port - the port number.
              */
+            areaChat.append("\n" + mensaje.getText());
             try {
                 Socket misocket = new Socket("192.168.0.7", 9999); //Creamos el puente
                 //Creamos un objeto donde almacenamos los datos
-                DatosEnvio paqueteEnvio = new DatosEnvio(dameTexto(nick), dameTexto(ip), dameTexto(mensaje));
+                DatosEnvio paqueteEnvio = new DatosEnvio(nick.getText(),(String) ips.getSelectedItem(), dameTexto(mensaje));
 
                 ObjectOutputStream paqueteDatos = new ObjectOutputStream(misocket.getOutputStream());
 
@@ -124,7 +147,4 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
 
     }
 
-    private JTextField mensaje, nick, ip;
-    private JTextArea areaChat;
-    private JButton miboton;
 }
