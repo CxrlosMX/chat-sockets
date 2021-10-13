@@ -11,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -74,24 +75,34 @@ public class MarcoServidor extends JFrame implements Runnable {
             while (true) {
                 //Le decimos a nuestra aplicación que acepte cualquier petición que venga del exterior
                 Socket miSo = servidor.accept(); //Le decimos que acepte todo tipo de entrada
-                //------
+
                 ObjectInputStream entradaDatos = new ObjectInputStream(miSo.getInputStream());//Leemos el flujo de datos
                 datosEnvio = (DatosEnvio) entradaDatos.readObject();
                 mensaje = datosEnvio.getMensaje();
                 nick = datosEnvio.getNick();
                 ip = datosEnvio.getNick();
-                areatexto.append("\n" + nick + ": " + mensaje + "para " + ip);
 
-                //Creamos otro socket, es el que enviara el mensaje a otro usuario
-                Socket enviarDestinatario = new Socket(ip, 9090); //Especificamos la ip y el puerto
+                if (mensaje.equals("Online")) {
 
-                ObjectOutputStream paqueteEnvio = new ObjectOutputStream(enviarDestinatario.getOutputStream());
+                    areatexto.append("\n" + nick + ": " + mensaje + "para " + ip);
 
-                //Agregamos el mensaje u objecto que se enviara
-                paqueteEnvio.writeObject(new DatosEnvio(nick, ip, mensaje));
-                paqueteEnvio.close();
-                enviarDestinatario.close();
-                miSo.close();
+                    //Creamos otro socket, es el que enviara el mensaje a otro usuario
+                    Socket enviarDestinatario = new Socket(ip, 9090); //Especificamos la ip y el puerto
+
+                    ObjectOutputStream paqueteEnvio = new ObjectOutputStream(enviarDestinatario.getOutputStream());
+
+                    //Agregamos el mensaje u objecto que se enviara
+                    paqueteEnvio.writeObject(new DatosEnvio(nick, ip, mensaje));
+                    paqueteEnvio.close();
+                    enviarDestinatario.close();
+                    miSo.close();
+                } else {
+                    //---------------------DETECTA ONLINE
+                    InetAddress localizacion = miSo.getInetAddress(); //Almacenamos la direccion con el cliente con el que nos estamos conectando
+                    String ipRemoto = localizacion.getHostAddress(); //Nos devuelve la ip del cliente
+                    System.out.println("Online: " + ipRemoto);
+                    //-----------------------------
+                }
             }
         } catch (IOException | ClassNotFoundException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", 0);

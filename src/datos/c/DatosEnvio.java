@@ -28,6 +28,8 @@ public class DatosEnvio implements Serializable { //Implement la interface Seria
         this.mensaje = mensaje;
     }
 
+    
+
     public DatosEnvio() {
 
     }

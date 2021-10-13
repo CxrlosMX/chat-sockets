@@ -5,6 +5,7 @@
  */
 package cliente;
 
+import evento.ventana.EnvioOnline;
 import javax.swing.JFrame;
 
 /**
@@ -16,17 +17,17 @@ import javax.swing.JFrame;
  * @Date: 05-oct-2021
  *
  */
-public class MarcoCliente extends JFrame{
-
+public class MarcoCliente extends JFrame {
+    
     public MarcoCliente() {
         setVisible(true);
         setTitle("Cliente");
         setBounds(600, 300, 380, 350);
-
+        
         LaminaMarcoCliente milamina = new LaminaMarcoCliente();
-
+        
         add(milamina);
-
+        addWindowListener(new EnvioOnline());
         
     }
 }
