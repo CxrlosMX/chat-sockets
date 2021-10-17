@@ -6,6 +6,7 @@
 package datos.c;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  *
@@ -21,7 +22,7 @@ public class DatosEnvio implements Serializable { //Implement la interface Seria
     private String nick;
     private String ip;
     private String mensaje;
-
+    private ArrayList<String> ipsLista;
     public DatosEnvio(String nick, String ip, String mensaje) {
         this.nick = nick;
         this.ip = ip;
@@ -32,6 +33,14 @@ public class DatosEnvio implements Serializable { //Implement la interface Seria
 
     public DatosEnvio() {
 
+    }
+
+    public ArrayList<String> getIpsLista() {
+        return ipsLista;
+    }
+
+    public void setIpsLista(ArrayList<String> ipsLista) {
+        this.ipsLista = ipsLista;
     }
 
     public String getNick() {

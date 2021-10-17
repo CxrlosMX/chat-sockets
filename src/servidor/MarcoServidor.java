@@ -5,6 +5,7 @@
  */
 package servidor;
 
+import arrayDinamico.ArrayDinamic;
 import datos.c.DatosEnvio;
 import java.awt.BorderLayout;
 import java.io.DataInputStream;
@@ -14,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -34,8 +36,10 @@ public class MarcoServidor extends JFrame implements Runnable {
 
     private JTextArea areatexto;
     private DatosEnvio datosEnvio;
+    private ArrayList<String> ipsUsuarios;
 
     public MarcoServidor() {
+        ipsUsuarios = new ArrayList<>();
         Thread hilo = new Thread(this);
         hilo.start();
         setBounds(1200, 300, 280, 350);
@@ -82,7 +86,7 @@ public class MarcoServidor extends JFrame implements Runnable {
                 nick = datosEnvio.getNick();
                 ip = datosEnvio.getNick();
 
-                if (mensaje.equals("Online")) {
+                if (!mensaje.equals("Online")) {
 
                     areatexto.append("\n" + nick + ": " + mensaje + "para " + ip);
 
@@ -100,7 +104,20 @@ public class MarcoServidor extends JFrame implements Runnable {
                     //---------------------DETECTA ONLINE
                     InetAddress localizacion = miSo.getInetAddress(); //Almacenamos la direccion con el cliente con el que nos estamos conectando
                     String ipRemoto = localizacion.getHostAddress(); //Nos devuelve la ip del cliente
-                    System.out.println("Online: " + ipRemoto);
+                    ipsUsuarios.add(ipRemoto); //Agregamos las ips a nuestro array
+                    datosEnvio.setIpsLista(ipsUsuarios);
+                    //  System.out.println("Online: " + ipRemoto);
+                    for (String i : ipsUsuarios) {
+                        Socket enviarDestinatario = new Socket(i, 9090); //Especificamos la ip y el puerto
+
+                        ObjectOutputStream paqueteEnvio = new ObjectOutputStream(enviarDestinatario.getOutputStream());
+
+                        //Agregamos el mensaje u objecto que se enviara
+                        paqueteEnvio.writeObject(new DatosEnvio(nick, ip, mensaje));
+                        paqueteEnvio.close();
+                        enviarDestinatario.close();
+                        miSo.close();
+                    }
                     //-----------------------------
                 }
             }

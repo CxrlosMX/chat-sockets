@@ -5,6 +5,7 @@
  */
 package cliente;
 
+import arrayDinamico.ArrayDinamic;
 import datos.c.DatosEnvio;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -16,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -59,9 +61,10 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
         nick = new JLabel();
         menNick = new JLabel("Nick: ");
         ips = new JComboBox();
-        ips.addItem("Usuario 1");
+        //agregarItems(ips);
+        /*ips.addItem("Usuario 1");
         ips.addItem("Usuario 2");
-        ips.addItem("Usuario 3");
+        ips.addItem("Usuario 3");*/ 
         nick.setText(nick_usuario);
         //texto.setFont(new Font("Serif", Font.ITALIC, 20));
         laminaMensaje.add(menNick);
@@ -95,6 +98,15 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
     public String dameTexto(JTextField campo) {
         return campo.getText();
     }
+    /*
+     Método que agrega las ips a nuestro JComboBox
+     */
+
+    public void agregarItems(JComboBox combo) {
+        for (String i : ArrayDinamic.ips) {
+            combo.addItem(i);
+        }
+    }
 
     @Override
     public void run() {
@@ -106,8 +118,18 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
                 cliente = servidorCliente.accept(); //Abrimos nuestro socket para aceptar todos los mensajes
                 ObjectInputStream flujoEntrada = new ObjectInputStream(cliente.getInputStream());
                 paqueteRecibido = (DatosEnvio) flujoEntrada.readObject();
-                areaChat.append("\n" + paqueteRecibido.getNick() + ": " + paqueteRecibido.getMensaje() + ". para: " + paqueteRecibido.getIp());
+                if (!paqueteRecibido.getMensaje().equalsIgnoreCase("Online")) {
+                    areaChat.append("\n" + paqueteRecibido.getNick() + ": " + paqueteRecibido.getMensaje() + ". para: " + paqueteRecibido.getIp());
 
+                } else {
+                    ips.removeAllItems();
+                    ArrayList<String> ipsMenu=new ArrayList<>();
+                    ipsMenu=paqueteRecibido.getIpsLista();
+                    for (String i : ipsMenu) {
+                        ips.addItem(i);
+                    }
+                    //areaChat.append("\n" + paqueteRecibido.getIpsLista());
+                }
             }
 
         } catch (Exception e) {
@@ -134,7 +156,7 @@ public class LaminaMarcoCliente extends JPanel implements Runnable {
             try {
                 Socket misocket = new Socket("192.168.0.7", 9999); //Creamos el puente
                 //Creamos un objeto donde almacenamos los datos
-                DatosEnvio paqueteEnvio = new DatosEnvio(nick.getText(),(String) ips.getSelectedItem(), dameTexto(mensaje));
+                DatosEnvio paqueteEnvio = new DatosEnvio(nick.getText(), (String) ips.getSelectedItem(), dameTexto(mensaje));
 
                 ObjectOutputStream paqueteDatos = new ObjectOutputStream(misocket.getOutputStream());
 
